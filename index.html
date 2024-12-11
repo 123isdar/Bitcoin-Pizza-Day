@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Pizza Day Countdown</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #1a1a1d;
+            --secondary-bg: #222;
+            --accent-color: #f2c94c;
+            --text-light: #fff;
+            --text-muted: #ddd;
+            --gradient-start: #ff9900;
+            --gradient-end: #f2c94c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            background-color: var(--secondary-bg);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            margin: 20px 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            padding: 20px 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .countdown {
+            font-size: 2rem;
+            font-weight: 600;
+            background-color: var(--text-light);
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: inline-block;
+            margin-top: 15px;
+        }
+
+        .content {
+            text-align: center;
+        }
+
+        .content h2, 
+        .content h3 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+
+        .content p {
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+
+        .bitcoin-image {
+            max-width: 100%;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .price-table th {
+            background-color: var(--accent-color);
+            color: var(--secondary-bg);
+            text-transform: uppercase;
+            padding: 10px;
+        }
+
+        .price-table td {
+            padding: 10px;
+            border: 1px solid #444;
+            color: var(--text-muted);
+        }
+
+        .footer {
+            background-color: var(--secondary-bg);
+            width: 100%;
+            padding: 15px 0;
+            text-align: center;
+            color: #aaa;
+            margin-top: auto;
+        }
+
+        @media screen and (max-width: 768px) {
+            header, .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            .countdown {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bitcoin Pizza Day Countdown</h1>
+        <div id="countdown" class="countdown">Loading...</div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <h2>The First Pizza Bought with Bitcoin</h2>
+            <p>On May 22, 2010, Laszlo Hanyecz made history by purchasing two pizzas for 10,000 BTC. This is considered the first real-world transaction using Bitcoin.</p>
+            
+            <img src="img.jfif" alt="Bitcoin Pizza" class="bitcoin-image" loading="lazy">
+            
+            <h3>Current Equivalent Prices</h3>
+            <table class="price-table">
+                <thead>
+                    <tr>
+                        <th>Currency</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>USD</td>
+                        <td id="usd-amount">Loading...</td>
+                    </tr>
+                    <tr>
+                        <td>EUR</td>
+                        <td id="eur-amount">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Bitcoin Pizza Day. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        class BitcoinPizzaTracker {
+            static async fetchBitcoinPrice() {
+                try {
+                    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur');
+                    const data = await response.json();
+                    
+                    if (!data.bitcoin) {
+                        throw new Error('Invalid API response');
+                    }
+
+                    const { usd, eur } = data.bitcoin;
+                    const btcAmount = 10000;
+
+                    this.updatePriceDisplay('usd-amount', usd, btcAmount);
+                    this.updatePriceDisplay('eur-amount', eur, btcAmount);
+                } catch (error) {
+                    console.error('Price fetch error:', error);
+                    this.handleErrorDisplay();
+                }
+            }
+
+            static updatePriceDisplay(elementId, exchangeRate, btcAmount) {
+                const element = document.getElementById(elementId);
+                const symbol = elementId === 'usd-amount' ? '$' : '€';
+                element.textContent = `${symbol}${(btcAmount * exchangeRate).toLocaleString()}`;
+            }
+
+            static handleErrorDisplay() {
+                ['usd-amount', 'eur-amount'].forEach(id => {
+                    const element = document.getElementById(id);
+                    element.textContent = 'Unable to load';
+                    element.style.color = 'red';
+                });
+            }
+
+            static updateCountdown() {
+                const now = new Date();
+                const targetDate = this.getNextPizzaDay(now);
+                const timeLeft = targetDate - now;
+
+                const countdownEl = document.getElementById('countdown');
+
+                if (timeLeft <= 0) {
+                    countdownEl.textContent = "Bitcoin Pizza Day is here!";
+                    return;
+                }
+
+                const { days, hours, minutes, seconds } = this.calculateTimeComponents(timeLeft);
+                countdownEl.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+            }
+
+            static getNextPizzaDay(now) {
+                let targetDate = new Date(now.getFullYear(), 4, 22);
+                return now > targetDate ? new Date(now.getFullYear() + 1, 4, 22) : targetDate;
+            }
+
+            static calculateTimeComponents(timeLeft) {
+                return {
+                    days: Math.floor(timeLeft / (1000 * 60 * 60 * 24)),
+                    hours: Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                    minutes: Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)),
+                    seconds: Math.floor((timeLeft % (1000 * 60)) / 1000)
+                };
+            }
+
+            static init() {
+                this.fetchBitcoinPrice();
+                this.updateCountdown();
+                setInterval(() => this.updateCountdown(), 1000);
+            }
+        }
+
+        // Initialize on DOM content loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            BitcoinPizzaTracker.init();
+        });
+    </script>
+</body>
+</html>
